@@ -4,6 +4,9 @@ from .models import  Eventsz
 
 
 class EventSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.email')
     class Meta:
         model = Eventsz
-        fields = ['title', 'description', 'date', 'time', 'location', 'price', 'artist']
+        fields = '__all__'
+
+

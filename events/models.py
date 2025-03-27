@@ -1,11 +1,20 @@
 from django.db import models
 from datetime import timedelta
+# from django.conf import settings
 
 # Create your models here.
 class Eventsz(models.Model):
+    GENRE_CHOICES = [
+        ("Music", "Music"),
+        ("Sports", "Sports"),
+        ("Tech", "Tech"),
+        ("Art", "Art"),
+        ("Food", "Food"),
+        ("Comedy", "Comedy"),
+    ]
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    genre = models.CharField(max_length=100)
+    genre = models.CharField(max_length=100, choices=GENRE_CHOICES)
     duration = models.DurationField(null=True, blank=True, default=timedelta())
     date = models.DateField()
     time = models.TimeField()
@@ -16,11 +25,14 @@ class Eventsz(models.Model):
     artist = models.CharField(max_length=100)
     artist_short_description = models.TextField(blank=True)
     why_attend = models.TextField(blank=True)
-    similar_events = models.ManyToManyField('self', blank=True)
     image = models.ImageField(upload_to='event_images/', blank=True, null=True)
+    image_artist = models.ImageField(upload_to='artist_images/', blank=True, null=True)
     capacity = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.CharField(max_length=200)
+    # attendees = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="events_attending", blank=True)
+    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events_created")
 
     def __str__(self):
         return self.title
+
+    
+
