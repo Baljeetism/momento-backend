@@ -1,19 +1,25 @@
 from django.db import models
-from accounts.models import User
-from events.models import Eventsz  
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class RSVP(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    event = models.ForeignKey(Eventsz, on_delete=models.CASCADE, related_name="rsvps")
-    status = models.CharField(max_length=20, choices=[
-        ("Going", "Going"),
-        ("Interested", "Interested"),
-        ("Not Going", "Not Going")
-    ], default="Going")
+    STATUS_CHOICES = [
+        ('Attending', 'Attending'),
+        ('Not_Attending', 'Not Attending'),
+        ('MAYBE', 'Maybe')
+        
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rsvps')
+    event = models.ForeignKey('events.Events', on_delete=models.CASCADE, related_name='rsvps')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES , default='Not_Attending')
     
 
     class Meta:
-        unique_together = ('user', 'event')  # Ensure a user can RSVP only once per event
+        unique_together = ('user', 'event')
+        verbose_name = 'RSVP'
+        # verbose_name_plural = 'RSVPs'
 
     def __str__(self):
-        return{self.user.username} 
+        return f"{self.user.username} - {self.event.name}: {self.get_status_display()}"
