@@ -9,128 +9,89 @@ import traceback
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
 
-
 logger = logging.getLogger(__name__)
+
+class IsSuperUserOrEventAdminOrCreator(permissions.BasePermission):
+    """
+    Custom permission to allow:
+    - Superusers can do anything
+    - Users with `is_admin=True` can create events
+    - Only the event creator or superusers can update or delete events
+    """
+
+    def has_permission(self, request, view):
+        """Handles overall permission for the viewset."""
+        if request.method in permissions.SAFE_METHODS:
+            return True  # Allow read access for everyone
+
+        if view.action == "create":
+            return request.user.is_authenticated and (request.user.is_superuser or getattr(request.user, "is_admin", False))
+
+        return request.user.is_authenticated  # Allow authenticated users for other actions
+
+    def has_object_permission(self, request, view, obj):
+        """Handles object-level permissions for update and delete."""
+        if request.method in permissions.SAFE_METHODS:
+            return True  # Allow read access for everyone
+
+        # Allow only the event creator or a superuser to modify/delete
+        return request.user.is_superuser or obj.created_by == request.user
+
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Events.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrEventAdminOrCreator]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = [DjangoFilterBackend]
 
     def perform_create(self, serializer):
+        """Restrict event creation to users with `is_admin=True` or `is_superuser=True`."""
+        user = self.request.user
+
+        if not (user.is_superuser or getattr(user, "is_admin", False)):  # Ensure `is_admin` exists
+            logger.warning(f"Unauthorized event creation attempt by {user}")
+            raise permissions.PermissionDenied("Only administrators or superusers can create events.")
+
         try:
-            # Assign the current user as the creator
-            serializer.save(created_by=self.request.user)
-            logger.info(" Event created successfully")
+            serializer.save(created_by=user)
+            logger.info(f"Event '{serializer.instance.title}' created by {user}")
         except Exception as e:
-            logger.error(f" Error while creating event: {e}", exc_info=True)
+            logger.error(f"Error while creating event: {e}", exc_info=True)
             raise
 
-    def create(self, request, *args, **kwargs):
-        try:
-            response = super().create(request, *args, **kwargs)
+    def update(self, request, *args, **kwargs):
+        """Ensure only the creator or a superuser can update the event."""
+        event = self.get_object()
+        if not (request.user.is_superuser or event.created_by == request.user):
             return Response(
-                {"message": "Event created successfully!", "event": response.data},
-                status=status.HTTP_201_CREATED
+                {"error": "Only the event creator or superusers can update this event."},
+                status=status.HTTP_403_FORBIDDEN
             )
-        except Exception as e:
-            logger.error(f" Failed to create event: {e}", exc_info=True)
-            return Response({"error": f"Failed to create event: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Ensure only the creator or a superuser can partially update the event."""
+        event = self.get_object()
+        if not (request.user.is_superuser or event.created_by == request.user):
+            return Response(
+                {"error": "Only the event creator or superusers can update this event."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        try:
-            event = self.get_object()
-            event_title = event.title
-            self.perform_destroy(event)
+        """Ensure only the event creator or a superuser can delete an event."""
+        event = self.get_object()
+
+        if not (request.user.is_superuser or event.created_by == request.user):
             return Response(
-                {"message": f"Event '{event_title}' was successfully deleted."},
-                status=status.HTTP_200_OK
+                {"error": "Only the event creator or superusers can delete this event."},
+                status=status.HTTP_403_FORBIDDEN
             )
-        except ObjectDoesNotExist:
-            logger.warning(" Event not found for deletion")
-            return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.error(f" Failed to delete event: {e}", exc_info=True)
-            traceback.print_exc()
-            return Response({"error": f"Failed to delete event: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# from django.shortcuts import render
-# from rest_framework import viewsets, permissions, status
-# from rest_framework.response import Response
-# from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-# import logging
-# from .models import Eventsz
-# from .serializers import EventSerializer
-# import traceback
-# from .filters import EventFilter
-# from django_filters.rest_framework import DjangoFilterBackend
-# from django.core.exceptions import ObjectDoesNotExist
-
-# # ✅ Set up a logger for error tracking
-# logger = logging.getLogger(__name__)
-
-# class EventViewSet(viewsets.ModelViewSet):
-#     queryset = Eventsz.objects.all()
-#     serializer_class = EventSerializer
-#     permission_classes = [permissions.AllowAny]
-#     parser_classes = (MultiPartParser, FormParser, JSONParser)
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_class = EventFilter
-
-    
-#     def perform_create(self, serializer):
-#         try:
-#             image = self.request.data.get('image', None)
-#             image_artist = self.request.data.get('image_artist', None)
-
-#             serializer.save(
-#                 image=image,
-#                 image_artist=image_artist
-#             )
-#         except Exception as e:
-#             logger.error(f"Failed to create event: {e}", exc_info=True)
-#             raise ValueError("Failed to create event due to invalid data or file upload issues.")
-
-    
-#     def create(self, request, *args, **kwargs):
-#         try:
-#             response = super().create(request, *args, **kwargs)
-#             event = response.data
-#             return Response(
-#                 {"message": "Event created successfully!", "event": event},
-#                 status=status.HTTP_201_CREATED
-#             )
-#         except Exception as e:
-#             logger.error(f"Error creating event: {e}", exc_info=True)
-#             return Response(
-#                 {"error": "Failed to create event. Please check your data and try again."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-   
-#     def destroy(self, request, *args, **kwargs):
-#         try:
-#             event = self.get_object()
-#             event_title = event.title
-#             self.perform_destroy(event)
-
-#             return Response(
-#                 {"message": f"Event '{event_title}' was successfully deleted."},
-#                 status=status.HTTP_200_OK
-#             )
-
-#         except ObjectDoesNotExist:
-#             return Response(
-#                 {"error": "Event not found."},
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-
-#         except Exception as e:
-#             logger.error(f"Failed to delete event: {e}", exc_info=True)
-#             traceback.print_exc()
-#             return Response(
-#                 {"error": f"Failed to delete event: {str(e)}"},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
+        self.perform_destroy(event)
+        return Response(
+            {"message": f"Event '{event.title}' was successfully deleted."},
+            status=status.HTTP_200_OK
+        )

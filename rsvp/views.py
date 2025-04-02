@@ -5,6 +5,7 @@ from .models import RSVP
 from events.models import Events
 from .serializers import RSVPSerializer
 from rest_framework import serializers  # Added missing import
+from .permissions import IsSuperUser
 
 class RSVPListCreateView(generics.ListCreateAPIView):
     """Handles listing and creating RSVPs"""
@@ -96,7 +97,7 @@ class RSVPDetailView(generics.RetrieveUpdateDestroyAPIView):
 class RSVPByEventView(generics.ListAPIView):
     """Retrieve all RSVPs for a specific event"""
     serializer_class = RSVPSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Ensure only logged-in users can access
+    permission_classes = [permissions.AllowAny]  # Ensure only logged-in users can access
 
     def get_queryset(self):
         event_id = self.kwargs.get("event_id")  # Get event ID from URL

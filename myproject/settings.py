@@ -15,6 +15,7 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -46,7 +47,10 @@ INSTALLED_APPS = [
     "djoser",
     'events',
     'django_filters',
-    'rsvp'
+    'rsvp',
+    'django_apscheduler',
+    
+    
 ]
 
 SIMPLE_JWT = {
@@ -60,9 +64,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'momento7641253@gmail.com'
-EMAIL_HOST_PASSWORD = 'ytxl okdk jety qlga'
+EMAIL_HOST_USER = os.getenv('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
+# Q_CLUSTER = {
+#     'name': 'DjangoORM',
+#     'django_redis': 'redis://127.0.0.1:6379',  # Redis connection (ensure Redis is running)
+#     'timeout': 60,  # Timeout for each task
+#     'retry': 120,  # Retry failed tasks after 120 seconds
+#     'catch_up': False,  # Don't run missed tasks if server was down
+#     'max_attempts': 3,  # Maximum retry attempts before giving up
+# }
 
 
 DJOSER = {
@@ -79,6 +91,46 @@ DJOSER = {
     },
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "file": {
+#             "level": "DEBUG",
+#             "class": "logging.FileHandler",
+#             "filename": "email_errors.log",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["file"],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#     },
+# }
+
+TIME_ZONE = 'Asia/Kolkata'
+USE_TZ = True
+
+
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default format for display
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -111,7 +163,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,6 +175,11 @@ TEMPLATES = [
         },
     },
 ]
+
+# CELERY SETTINGS
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as message broker
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
@@ -162,11 +219,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+
 
 USE_I18N = True
 
-USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
