@@ -10,7 +10,6 @@ urlpatterns = [
     
     # Additional useful endpoints:
     path('users/<int:user_id>/rsvps/', RSVPListCreateView.as_view(), name='user-rsvps'),
-    # path('users/<int:user_id>/rsvps/', RSVPListCreateView.as_view(), name='user-rsvps'),
     path('events/<int:event_id>/rsvps/', RSVPListCreateView.as_view(), name='event-rsvps'),
     path('rsvps/<int:pk>/', RSVPDetailView.as_view(), name='rsvp-detail'),
     path("rsvp/event/<int:event_id>/", RSVPByEventView.as_view(), name="rsvp-by-event"),

@@ -5,7 +5,8 @@ from django.conf import settings
 from django_apscheduler import util
 import logging
 from django.utils import timezone
-import pytz  # Make sure to install pytz if not already present
+import pytz  
+from events.tasks import check_and_send_reminders
 
 logger = logging.getLogger(__name__)
 
@@ -21,18 +22,17 @@ def start_scheduler():
     scheduler = BackgroundScheduler(timezone=tz)
     scheduler.add_jobstore(DjangoJobStore(), "default")
     
-    # Import inside function to avoid circular imports
-    from events.tasks import check_and_send_reminders
+
     
     # Add jobs with explicit timezone
     scheduler.add_job(
         check_and_send_reminders,
         'interval',
-        minutes=1,
+        hours=2,
         id='event_reminders',
         replace_existing=True,
         max_instances=1,
-        timezone=tz  # Use the timezone object directly
+        timezone=tz  
     )
     
     scheduler.add_job(

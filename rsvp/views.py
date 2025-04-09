@@ -38,13 +38,7 @@ class RSVPListCreateView(generics.ListCreateAPIView):
         # Update attendees
         # self.update_attendees(rsvp_instance)
 
-    def update_attendees(self, rsvp):
-        """Helper method to manage event attendees"""
-        # if rsvp.status.lower() == "attending":
-        #     rsvp.event.attendees.add(rsvp.user)
-        # else:
-        #     rsvp.event.attendees.remove(rsvp.user)
-        pass
+    
     def list(self, request, *args, **kwargs):
         """Custom list response with event details"""
         queryset = self.filter_queryset(self.get_queryset())
@@ -81,19 +75,8 @@ class RSVPDetailView(generics.RetrieveUpdateDestroyAPIView):
         # if old_status.lower() != new_status.lower():
         #     self.update_attendees(instance)
 
-    def update_attendees(self, rsvp):
-        """Helper method to manage event attendees"""
-        # if rsvp.status.lower() == "attending":
-        #     rsvp.event.attendees.add(rsvp.user)
-        # else:
-        #     rsvp.event.attendees.remove(rsvp.user)
-        pass
-
-    def perform_destroy(self, instance):
-        """Remove user from event attendees when deleting RSVP"""
-        # instance.event.attendees.remove(instance.user)
-        # instance.delete()
-        pass
+    
+   
 class RSVPByEventView(generics.ListAPIView):
     """Retrieve all RSVPs for a specific event"""
     serializer_class = RSVPSerializer

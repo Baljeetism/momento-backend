@@ -29,11 +29,11 @@ def process_event_reminders(event, current_time):
     try:
         event_datetime = timezone.make_aware(
             datetime.combine(event.date, event.time),
-            timezone=timezone.get_current_timezone()  # Asia/Kolkata
+            timezone=timezone.get_current_timezone()  
         )
         time_until = (event_datetime - current_time).total_seconds() / 60
         
-        if 0 < time_until <= 5:
+        if 715 < time_until <= 720:
             send_event_reminders(event)
     except Exception as e:
         logger.error(f"Error processing event {event.id}: {e}")
@@ -43,7 +43,7 @@ def send_event_reminders(event):
     from rsvp.models import RSVP
     
     try:
-        rsvps = RSVP.objects.filter(event=event).select_related('user')
+        rsvps = RSVP.objects.filter(event=event, status__in=["Attending", "Maybe"]).select_related('user')
         if not rsvps.exists():
             logger.info(f"No RSVPs found for event {event.id}")
             return
@@ -71,14 +71,14 @@ def send_reminder_email(event, recipient_email):
         email = EmailMultiAlternatives(
             subject=f"⏰ Reminder: {event.title} starts soon!",
             body=strip_tags(html_content),
-            from_email="Momento <momento7641253@gmail.com>",  # More professional
+            from_email="Momento <momento7641253@gmail.com>",
             to=[recipient_email],
-            reply_to=["momento7641253@gmail.com"]  # Optional
+            reply_to=["momento7641253@gmail.com"]  
         )
         email.attach_alternative(html_content, "text/html")
 
         # Send and log
-        email.send(fail_silently=False)  # Force exception on failure
+        email.send(fail_silently=False) 
         logger.info(f"Email sent to {recipient_email}")
         return True
 

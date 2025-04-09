@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 import logging
@@ -8,50 +8,34 @@ from .serializers import EventSerializer
 import traceback
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
+
+
 
 logger = logging.getLogger(__name__)
 
-class IsSuperUserOrEventAdminOrCreator(permissions.BasePermission):
-    """
-    Custom permission to allow:
-    - Superusers can do anything
-    - Users with `is_admin=True` can create events
-    - Only the event creator or superusers can update or delete events
-    """
 
-    def has_permission(self, request, view):
-        """Handles overall permission for the viewset."""
-        if request.method in permissions.SAFE_METHODS:
-            return True  # Allow read access for everyone
-
-        if view.action == "create":
-            return request.user.is_authenticated and (request.user.is_superuser or getattr(request.user, "is_admin", False))
-
-        return request.user.is_authenticated  # Allow authenticated users for other actions
-
-    def has_object_permission(self, request, view, obj):
-        """Handles object-level permissions for update and delete."""
-        if request.method in permissions.SAFE_METHODS:
-            return True  # Allow read access for everyone
-
-        # Allow only the event creator or a superuser to modify/delete
-        return request.user.is_superuser or obj.created_by == request.user
 
 
 class EventViewSet(viewsets.ModelViewSet):
+    from .permission import IsSuperUserOrEventAdminOrCreator
     queryset = Events.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsSuperUserOrEventAdminOrCreator]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["created_by",'artist', 'location', 'date']
+
 
     def perform_create(self, serializer):
         """Restrict event creation to users with `is_admin=True` or `is_superuser=True`."""
         user = self.request.user
+        # print("hi",user)
 
-        if not (user.is_superuser or getattr(user, "is_admin", False)):  # Ensure `is_admin` exists
-            logger.warning(f"Unauthorized event creation attempt by {user}")
-            raise permissions.PermissionDenied("Only administrators or superusers can create events.")
+        # if not (user.is_superuser or getattr(user, "is_admin", False)):  # Ensure `is_admin` exists
+        #     logger.warning(f"Unauthorized event creation attempt by {user}")
+        #     raise permissions.PermissionDenied("Only administrators or superusers can create events.")
 
         try:
             serializer.save(created_by=user)
@@ -95,3 +79,5 @@ class EventViewSet(viewsets.ModelViewSet):
             {"message": f"Event '{event.title}' was successfully deleted."},
             status=status.HTTP_200_OK
         )
+
+

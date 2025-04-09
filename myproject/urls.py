@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/', include('events.urls')),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),  # JWT endpoints
-     path('api/rsvp/', include('rsvp.urls')),
+    path('api/rsvp/', include('rsvp.urls')),
+    path('api/reviews/', include('reviews.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

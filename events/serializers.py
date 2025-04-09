@@ -4,7 +4,7 @@ from .models import  Events
 
 
 class EventSerializer(serializers.ModelSerializer):
-    created_by = serializers.ReadOnlyField(source='created_by.email')
+    created_by = serializers.ReadOnlyField(source='created_by.first_name')
     class Meta:
         model = Events
         fields = '__all__'
