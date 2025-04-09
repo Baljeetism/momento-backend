@@ -205,16 +205,16 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 #         'PORT': '',          # Leave empty to use the default PostgreSQL port (usually 5432)
 #     }
 # }
-import os
+
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME', 'momento'),  
-        'USER': os.getenv('DATABASE_USER', 'admin'),  
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'admin123@'),  
-        'HOST': 'db',  # Connect to 'db' (PostgreSQL service in Docker)
-        'PORT': 5432,  # Default PostgreSQL port
+        'NAME': os.getenv('DATABASE_NAME', 'momento'),
+        'USER': os.getenv('DATABASE_USER', 'admin'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'admin123@'),
+        'HOST': os.getenv('DATABASE_HOST', 'db'),
+        'PORT': int(os.getenv('DATABASE_PORT', 5432)),  # Convert port to integer
     }
 }
 

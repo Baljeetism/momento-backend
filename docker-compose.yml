@@ -24,8 +24,8 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_HOST: db  # Changed to use service name
-      DATABASE_PORT: 5432  # Standard PostgreSQL port
+      DATABASE_HOST: db  
+      DATABASE_PORT: 5432  
     ports:
       - "8000:8000"
     command: >
@@ -33,3 +33,5 @@ services:
              python manage.py runserver 0.0.0.0:8000"
 
 
+volumes:
+  postgres_data:
