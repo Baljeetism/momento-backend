@@ -68,14 +68,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
-# Q_CLUSTER = {
-#     'name': 'DjangoORM',
-#     'django_redis': 'redis://127.0.0.1:6379',  # Redis connection (ensure Redis is running)
-#     'timeout': 60,  # Timeout for each task
-#     'retry': 120,  # Retry failed tasks after 120 seconds
-#     'catch_up': False,  # Don't run missed tasks if server was down
-#     'max_attempts': 3,  # Maximum retry attempts before giving up
-# }
+
 
 
 DJOSER = {
@@ -106,24 +99,7 @@ LOGGING = {
     },
 }
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "file": {
-#             "level": "DEBUG",
-#             "class": "logging.FileHandler",
-#             "filename": "email_errors.log",
-#         },
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["file"],
-#             "level": "DEBUG",
-#             "propagate": True,
-#         },
-#     },
-# }
+
 
 TIME_ZONE = 'Asia/Kolkata'
 USE_TZ = True
@@ -137,8 +113,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 6,
+
 }
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -178,43 +153,20 @@ TEMPLATES = [
     },
 ]
 
-# CELERY SETTINGS
-# CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as message broker
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
+
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'momento',
-#         'USER': 'admin',
-#         'PASSWORD': 'admin123@',
-#         'HOST': 'localhost',  # Replace with your PostgreSQL server's address if necessary
-#         'PORT': '',          # Leave empty to use the default PostgreSQL port (usually 5432)
-#     }
-# }
 
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME', 'momento'),
-        'USER': os.getenv('DATABASE_USER', 'admin'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'admin123@'),
-        'HOST': os.getenv('DATABASE_HOST', 'db'),
-        'PORT': int(os.getenv('DATABASE_PORT', 5432)),  # Convert port to integer
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
     }
 }
 
