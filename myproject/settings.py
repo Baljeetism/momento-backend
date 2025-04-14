@@ -29,7 +29,8 @@ SECRET_KEY = 'django-insecure-6-!uo*-^q8^_us4%+8bj!=5k=7*_1f$e3uz@o=b_3ra!#4fr)6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
 
 
 # Application definition
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'rsvp',
     'django_apscheduler',
     'reviews',
+    'sslserver',
     
     
 ]
@@ -118,7 +120,8 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'accounts.User'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  
+    "http://localhost:3000",
+    "https://main.d2xpkxrlwqtl4n.amplifyapp.com",   
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
