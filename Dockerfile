@@ -26,4 +26,5 @@ COPY certs/private.key /etc/ssl/private/
 EXPOSE 443
 
 # Run migrations and start the Django server with SSL
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runsslserver --certificate /etc/ssl/certs/certificate.crt --key /etc/ssl/private/private.key 0.0.0.0:443"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver"]
+# CMD ["sh", "-c", "python manage.py migrate && python manage.py runsslserver --certificate /etc/ssl/certs/certificate.crt --key /etc/ssl/private/private.key 0.0.0.0:443"]
