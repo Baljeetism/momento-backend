@@ -23,7 +23,7 @@ COPY certs/certificate.crt /etc/ssl/certs/
 COPY certs/private.key /etc/ssl/private/
 
 # Expose port 443 for HTTPS
-EXPOSE 443
+EXPOSE 8000
 
 # Run migrations and start the Django server with SSL
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver"]
