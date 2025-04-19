@@ -15,7 +15,7 @@ def start_scheduler():
     try:
         tz = pytz.timezone(settings.TIME_ZONE)
     except pytz.UnknownTimeZoneError:
-        logger.error(f"❌ Unknown timezone: {settings.TIME_ZONE}. Falling back to UTC.")
+        logger.error(f" Unknown timezone: {settings.TIME_ZONE}. Falling back to UTC.")
         tz = pytz.UTC
     
     # Initialize scheduler with the timezone
@@ -46,10 +46,10 @@ def start_scheduler():
     
     try:
         scheduler.start()
-        logger.info(f"✅ Scheduler started successfully in {tz.zone} timezone")
+        logger.info(f" Scheduler started successfully in {tz.zone} timezone")
         logger.info(f"Current time: {timezone.localtime(timezone.now())}")
     except Exception as e:
-        logger.error(f"❌ Scheduler startup failed: {e}")
+        logger.error(f" Scheduler startup failed: {e}")
         raise
 
 @util.close_old_connections
